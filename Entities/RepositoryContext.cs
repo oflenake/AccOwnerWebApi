@@ -16,13 +16,18 @@ namespace Entities
     {
         // Disable Lazy Loading at the context level. It can be enabled 
         // explicitly when it needs to be utilized.
-        public RepositoryContext(DbContextOptions<RepositoryContext> options)
+        //public RepositoryContext(DbContextOptions<RepositoryContext> options)
+        //    : base(options)
+        //{
+        //    ChangeTracker.LazyLoadingEnabled = false;
+        //}
+
+        public RepositoryContext(DbContextOptions options)
             : base(options)
         {
-            ChangeTracker.LazyLoadingEnabled = false;
         }
 
-        public IConfiguration Configuration { get; }
+        //public IConfiguration Configuration { get; }
 
         public DbSet<Owner> Owners { get; set; }
         public DbSet<Account> Accounts { get; set; }
@@ -34,18 +39,18 @@ namespace Entities
         /// <see cref="OwnerRelated"/> class, the <see cref="Accounts"/> navigation property 
         /// will be lazy-loaded.
         /// </summary>
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            //var sqlConnString = Configuration["SQLConnString:DBConnAccountOwner"];
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    //var sqlConnString = Configuration["SQLConnString:DBConnAccountOwner"];
 
-            if (!optionsBuilder.IsConfigured)
-            {
-                // #warning To protect potentially sensitive information in your connection string, you should move it out of 
-                // source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder
-                    .UseLazyLoadingProxies()
-                    .UseSqlServer(Configuration["SQLConnString:DBConnAccountOwner"]);
-            }
-        }
+        //    if (!optionsBuilder.IsConfigured)
+        //    {
+        //        // #warning To protect potentially sensitive information in your connection string, you should move it out of 
+        //        // source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
+        //        optionsBuilder
+        //            .UseLazyLoadingProxies()
+        //            .UseSqlServer(Configuration["SQLConnString:DBConnAccountOwner"]);
+        //    }
+        //}
     }
 }

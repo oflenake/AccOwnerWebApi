@@ -9,8 +9,8 @@ namespace Entities.RelatedModels
     /// The <see cref="OwnerRelated"/> class helps to retrieve the <see cref="Owner"/> entity's 
     /// data, and its related <see cref="Account"/> entity's data. The related data is 
     /// retrieved through the <see cref="Accounts"/> navigation property, of the 
-    /// <see cref="OwnerRelated"/> class, in which it will be lazy-loaded. Additional 
-    /// information for this lazy-loading is in the <see cref="RepositoryContext"/> class.
+    /// <see cref="OwnerRelated"/> class, in which it will be optionaly lazy-loaded. Additional 
+    /// information about the lazy-loading option in the <see cref="RepositoryContext"/> class.
     /// </summary>
     public class OwnerRelated : IEntity
     {
@@ -21,10 +21,10 @@ namespace Entities.RelatedModels
 
         public virtual IEnumerable<Account> Accounts { get; set; }
 
-        /// <see cref="OwnerRelated"/> constructor disabled to enable lazy-loading.
-        //public OwnerRelated()
-        //{
-        //}
+        /// <see cref="OwnerRelated"/> constructor enabled/disabled to configure lazy-loading.
+        public OwnerRelated()
+        {
+        }
 
         public OwnerRelated(Owner owner)
         {

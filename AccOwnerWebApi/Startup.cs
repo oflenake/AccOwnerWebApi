@@ -73,7 +73,6 @@ namespace AccOwnerWebApi
             {
                 ForwardedHeaders = ForwardedHeaders.All
             });
-
             app.UseStaticFiles();
             app.UseMvc();
         }
