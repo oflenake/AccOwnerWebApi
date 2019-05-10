@@ -260,3 +260,5 @@ paket-files/
 __pycache__/
 *.pyc
 /AccOwnerWebApi/VisionDream/VDREP/src/aspnet/core/Logs/AccOwnerWebApi/Internal/WebApi_internallog.txt
+/AccOwnerSQL_DEV.sql
+/AccOwnerSQL_PROD.sql
