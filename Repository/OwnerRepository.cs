@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Contracts;
 using Entities;
 using Entities.RelatedModels;
 using Entities.Extensions;
 using Entities.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Repository
 {
@@ -16,57 +18,61 @@ namespace Repository
     /// </summary>
     public class OwnerRepository : RepositoryBase<Owner>, IOwnerRepository
     {
-        public OwnerRepository(RepositoryContext repositoryContext)
-            : base(repositoryContext)
+        public OwnerRepository(ILoggerManager logger, RepositoryContext repositoryContext)
+            : base(logger, repositoryContext)
         {
         }
 
         // Get all Owners
-        public IEnumerable<Owner> GetAllData()
+        public async Task<IEnumerable<Owner>> GetAllAsyncData()
         {
-            return GetAllBaseData()
-                .OrderBy(ow => ow.Name);
+            return await GetAllBaseData()
+                .OrderBy(x => x.Name)
+                .ToListAsync();
         }
 
         // Get Owner by Id
-        public Owner GetByIDData(Guid ownerID)
+        public async Task<Owner> GetByIDAsyncData(Guid ownerID)
         {
-            return GetByIDBaseData(owner => owner.ID.Equals(ownerID))
+            return await GetByIDBaseData(o => o.ID.Equals(ownerID))
                     .DefaultIfEmpty(new Owner())
-                    .FirstOrDefault();
+                    .SingleAsync();
         }
 
         // Get all related Accounts for a particular Owner
-        public OwnerRelated GetByIDRelatedData(Guid ownerID)
+        public async Task<OwnerRelated> GetByIDRelatedAsyncData(Guid ownerID)
         {
-            return new OwnerRelated(GetByIDData(ownerID))
-            {
-                Accounts = RepositoryContext.Accounts
-                    .Where(a => a.OwnerID == ownerID)
-            };
+            return await GetByIDBaseData(o => o.ID.Equals(ownerID))
+                .Select(owner => new OwnerRelated(owner)
+                {
+                    Accounts = RepositoryContext.Accounts
+                    .Where(a => a.OwnerID.Equals(owner.ID))
+                    .ToList()
+                })
+                .SingleOrDefaultAsync();
         }
 
         // Create new Owner
-        public void PostCreateData(Owner owner)
+        public async Task PostCreateAsyncData(Owner owner)
         {
             owner.ID = Guid.NewGuid();
             PostCreateBaseData(owner);
-            SaveBaseData();
+            await SaveAsyncBaseData();
         }
 
         // Update Owner
-        public void PutUpdateData(Owner dbOwner, Owner owner)
+        public async Task PutUpdateAsyncData(Owner dbOwner, Owner owner)
         {
             dbOwner.Map(owner);
             PutUpdateBaseData(dbOwner);
-            SaveBaseData();
+            await SaveAsyncBaseData();
         }
 
         // Delete Owner
-        public void DeleteByIDData(Owner owner)
+        public async Task DeleteByIDAsyncData(Owner owner)
         {
             DeleteByIDBaseData(owner);
-            SaveBaseData();
+            await SaveAsyncBaseData();
         }
     }
 }

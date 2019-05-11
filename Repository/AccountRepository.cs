@@ -13,8 +13,8 @@ namespace Repository
     /// </summary>
     public class AccountRepository : RepositoryBase<Account>, IAccountRepository
     {
-        public AccountRepository(RepositoryContext repositoryContext)
-            : base(repositoryContext)
+        public AccountRepository(ILoggerManager logger, RepositoryContext repositoryContext)
+            : base(logger, repositoryContext)
         {
         }
 

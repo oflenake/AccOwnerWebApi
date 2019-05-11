@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Contracts;
 using Entities.Extensions;
 using Entities.Models;
@@ -29,11 +30,14 @@ namespace AccOwnerWebApi.Controllers
         /// <param name="repository"></param>
         public OwnerController(ILoggerManager logger, IRepositoryWrapper repository)
         {
-            _component = "OwnerController";
-            _process = string.Empty;
-            _message = string.Empty;
             _logger = logger;
             _repository = repository;
+
+            _component = "OwnerController";
+            _process = "OwnerController";
+            _message = string.Format($" Initializing component: '{_component}' using its constructor '{_component}.{_process}'");
+
+            _logger.LogInfo($"{_message}.");
         }
         #endregion
 
@@ -47,22 +51,24 @@ namespace AccOwnerWebApi.Controllers
 
         // GET: api/owner - Get All Owners
         [HttpGet]
-        public IActionResult GetAllAction()
+        public async Task<IActionResult> GetAllAction()
         {
             try
             {
-                _process = "GetAllAction";
-                var owners = _repository.Owner.GetAllData();
+                var owners = await _repository.Owner.GetAllAsyncData();
 
-                _message = "Returned all owners from database";
-                _logger.LogInfo($"{string.Format("[{0}.{1}] - {2}.", _component, _process, _message)}");
+                _process = "GetAllAction";                
+                _message = string.Format($" {_component} action method '{_component}.{_process}' " +
+                                         $"returned all owners from the database");
+                _logger.LogInfo($"{_message}.");
 
                 return Ok(owners); // Ok status code is: 200
             }
             catch (Exception ex)
             {
-                _message = "An exception occured in 'GetAllAction' action method";
-                _logger.LogError($"{string.Format("[{0}.{1}] - {2}:", _component, _process, _message)} {ex.Message}");
+                _message = string.Format($" {_component} action method '{_component}.{_process}' encountered a code 500 exception." +
+                                         $" Details: {ex.Message}");
+                _logger.LogInfo($"{_message}.");
 
                 return StatusCode(500, "Internal server error");
             }
@@ -70,78 +76,86 @@ namespace AccOwnerWebApi.Controllers
 
         // GET: api/owner/1234-abcd-5678-efgh - Get Owner by id
         [HttpGet("{id}", Name = "GetByIDOwner")]
-        public IActionResult GetByIDAction(Guid id)
+        public async Task<IActionResult> GetByIDAction(Guid id)
         {
             try
             {
-                var owner = _repository.Owner.GetByIDData(id);
+                _process = "GetByIDAction";
+                var owner = await _repository.Owner.GetByIDAsyncData(id);
 
                 if (owner.IsEmptyObject())
                 {
-                    _logger.LogError($"[OwnerController.GetByIDAction] - Owner with id: {id}, hasn't been found in db.");
+                    _logger.LogError($" OwnerController.GetByIDAction Owner with id: {id}, hasn't been found in db.");
                     return NotFound("Owner not found");
                 }
                 else
                 {
-                    _logger.LogInfo($"[OwnerController.GetByIDAction] - Returned owner with id: {id}.");
+                    _logger.LogInfo($" OwnerController.GetByIDAction Returned owner with id: {id}.");
                     return Ok(owner); // Ok status code is: 200
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError($"[OwnerController.GetByIDAction] - An exception occured in " +
-                                 $"'GetByIDAction' action method: {ex.Message}");
+                _message = string.Format($" {_component} action method '{_component}.{_process}' encountered a code 500 exception." +
+                                         $" Details: {ex.Message}");
+                _logger.LogInfo($"{_message}.");
+
                 return StatusCode(500, "Internal server error");
             }
         }
 
         // GET: api/owner/1234-abcd-5678-efgh/account - Get all Accounts for an Owner
         [HttpGet("{id}/account")]
-        public IActionResult GetByIDRelatedAction(Guid id)
+        public async Task<IActionResult> GetByIDRelatedAction(Guid id)
         {
             try
             {
-                var owner = _repository.Owner.GetByIDRelatedData(id);
+                _process = "GetByIDRelatedAction";
+                var owner = await _repository.Owner.GetByIDRelatedAsyncData(id);
 
                 if (owner.IsEmptyObject())
                 {
-                    _logger.LogError($"[OwnerController.GetByIDRelatedAction] - Owner with id: {id}, hasn't been found in db.");
+                    _logger.LogError($" OwnerController.GetByIDRelatedAction Owner with id: {id}, hasn't been found in db.");
                     return NotFound("Owner not found");
                 }
                 else
                 {
-                    _logger.LogInfo($"[OwnerController.GetByIDRelatedAction] - Returned owner with id: {id}, related details.");
+                    _logger.LogInfo($" OwnerController.GetByIDRelatedAction Returned owner with id: {id}, related details.");
                     return Ok(owner); // Ok status code is: 200
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError($"[OwnerController.GetByIDRelatedAction] - An exception occured in " +
-                                 $"'GetByIDRelatedAction' action method: {ex.Message}");
+                _message = string.Format($" {_component} action method '{_component}.{_process}' encountered a code 500 exception." +
+                                         $" Details: {ex.Message}");
+                _logger.LogInfo($"{_message}.");
+
                 return StatusCode(500, "Internal server error");
             }
         }
 
         // POST: api/owner - Add Owner
         [HttpPost]
-        public IActionResult PostCreateAction([FromBody]Owner owner)
+        public async Task<IActionResult> PostCreateAction([FromBody]Owner owner)
         {
             try
             {
+                _process = "PostCreateAction";
+
                 if (owner.IsObjectNull())
                 {
-                    _logger.LogError("[OwnerController.PostCreateAction] - Owner object sent from client is null.");
+                    _logger.LogError(" OwnerController.PostCreateAction Owner object sent from client is null.");
                     return BadRequest("Owner object is null");
                 }
 
                 if (!ModelState.IsValid)
                 {
-                    _logger.LogError("[OwnerController.PostCreateAction] - Invalid model owner object sent from client.");
+                    _logger.LogError(" OwnerController.PostCreateAction Invalid model owner object sent from client.");
                     return BadRequest("Invalid model object");
                 }
 
-                _repository.Owner.PostCreateData(owner);
-                _logger.LogInfo($"[OwnerController.PostCreateAction] - New owner with id: {owner.ID}, " +
+                await _repository.Owner.PostCreateAsyncData(owner);
+                _logger.LogInfo($" OwnerController.PostCreateAction New owner with id: {owner.ID}, " +
                                 $"created at route: 'GetByIDOwner'.");
                 // CreatedAtRoute will return a status code 201, which stands for Created and also 
                 // it populates the body of the response with the new owner object, as well as the 
@@ -151,83 +165,94 @@ namespace AccOwnerWebApi.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError($"[OwnerController.PostCreateAction] - An exception occured in " +
-                                 $"'PostCreateAction' action method: {ex.Message}");
+                _message = string.Format($" {_component} action method '{_component}.{_process}' encountered a code 500 exception." +
+                                         $" Details: {ex.Message}");
+                _logger.LogInfo($"{_message}.");
+
                 return StatusCode(500, "Internal server error");
             }
         }
 
         // PUT: api/owner/1234-abcd-5678-efgh - Update Owner
         [HttpPut("{id}")]
-        public IActionResult PutUpdateAction(Guid id, [FromBody]Owner owner)
+        public async Task<IActionResult> PutUpdateAction(Guid id, [FromBody]Owner owner)
         {
             try
             {
+                _process = "PutUpdateAction";
+
                 if (owner.IsObjectNull())
                 {
-                    _logger.LogError("[OwnerController.PutUpdateAction] - Owner object sent from client is null.");
+                    _logger.LogError(" OwnerController.PutUpdateAction Owner object sent from client is null.");
                     return BadRequest("Owner object is null");
                 }
 
                 if (!ModelState.IsValid)
                 {
-                    _logger.LogError("[OwnerController.PutUpdateAction] - Invalid model owner object sent from client.");
+                    _logger.LogError(" OwnerController.PutUpdateAction Invalid model owner object sent from client.");
                     return BadRequest("Invalid model object");
                 }
 
-                var dbOwner = _repository.Owner.GetByIDData(id);
+                var dbOwner = await _repository.Owner.GetByIDAsyncData(id);
 
                 if (dbOwner.IsEmptyObject())
                 {
-                    _logger.LogError($"[OwnerController.PutUpdateAction] - Owner with id: {id}, hasn't been found in db.");
+                    _logger.LogError($" OwnerController.PutUpdateAction Owner with id: {id}, hasn't been found in db.");
                     return NotFound("Owner not found");
                 }
 
-                _repository.Owner.PutUpdateData(dbOwner, owner);
-                _logger.LogInfo($"[OwnerController.PutUpdateAction] - Owner with id: {owner.ID}, " +
+                await _repository.Owner.PutUpdateAsyncData(dbOwner, owner);
+
+                _logger.LogInfo($" OwnerController.PutUpdateAction Owner with id: {owner.ID}, " +
                                 $"updated successfully.");
 
                 return NoContent(); // Stands for status code 204
             }
             catch (Exception ex)
             {
-                _logger.LogError($"[OwnerController.PutUpdateAction] - An exception occured in " +
-                                 $"'PutUpdateAction' action method: {ex.Message}");
+                _message = string.Format($" {_component} action method '{_component}.{_process}' encountered a code 500 exception." +
+                                         $" Details: {ex.Message}");
+                _logger.LogInfo($"{_message}.");
+
                 return StatusCode(500, "Internal server error");
             }
         }
 
         // DELETE: api/owner/1234-abcd-5678-efgh - Delete Owner
         [HttpDelete("{id}")]
-        public IActionResult DeleteByIDAction(Guid id)
+        public async Task<IActionResult> DeleteByIDAction(Guid id)
         {
             try
             {
-                var owner = _repository.Owner.GetByIDData(id);
+                _process = "DeleteByIDAction";
+                var owner = await _repository.Owner.GetByIDAsyncData(id);
 
                 if (owner.IsEmptyObject())
                 {
-                    _logger.LogError($"[OwnerController.DeleteByIDAction] - Owner with id: {id}, hasn't been found in db.");
+                    _logger.LogError($" OwnerController.DeleteByIDAction Owner with id: {id}, hasn't been found in db.");
                     return NotFound("Owner not found");
                 }
 
                 if (_repository.Account.GetByIDData(id).Any())
                 {
-                    _logger.LogWarn($"[OwnerController.DeleteByIDAction] - Cannot delete owner with id: {id}. " +
+                    _logger.LogWarn($" OwnerController.DeleteByIDAction Cannot delete owner with id: {id}. " +
                                      $"It has related accounts. Delete those accounts first.");
                     return BadRequest("Cannot delete owner. It has related accounts. Delete those accounts first");
                 }
 
-                _repository.Owner.DeleteByIDData(owner);
-                _logger.LogInfo($"[OwnerController.DeleteByIDAction] - Owner with id: {id}, " +
+                await _repository.Owner.DeleteByIDAsyncData(owner);
+
+                _logger.LogInfo($" OwnerController.DeleteByIDAction Owner with id: {id}, " +
                                 $"deleted successfully.");
 
                 return NoContent(); // Stands for status code 204
             }
             catch (Exception ex)
             {
-                _logger.LogError($"[OwnerController.DeleteByIDAction] - An exception occured in " +
-                                 $"'DeleteByIDAction' action method: {ex.Message}");
+                _message = string.Format($" {_component} action method '{_component}.{_process}' encountered a code 500 exception." +
+                                         $" Details: {ex.Message}");
+                _logger.LogInfo($"{_message}.");
+
                 return StatusCode(500, "Internal server error");
             }
         }

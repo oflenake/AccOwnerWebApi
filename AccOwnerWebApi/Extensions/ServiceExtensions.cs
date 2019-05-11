@@ -52,6 +52,12 @@ namespace AccOwnerWebApi.Extensions
             //services.AddScoped<IDataRepository<Author, AuthorDTO>, AuthorDataManager>();
             //services.AddScoped<IDataRepository<Book, BookDTO>, BookDataManager>();
             //services.AddScoped<IDataRepository<Publisher, PublisherDTO>, PublisherDataManager>();
+
+            //string Version = string.Empty;
+            //int MajorVersion = 1;         // Year
+            //int MinorVersion = 0;         // Month
+            //int RevisionNumber = 0;       // Day - "*"
+            //int BuildNumber = 0;          // Seconds
         }
 
         // Repository Wrapper configuration

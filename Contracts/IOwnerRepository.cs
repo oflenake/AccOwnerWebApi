@@ -2,16 +2,17 @@
 using Entities.Models;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Contracts
 {
     public interface IOwnerRepository : IRepositoryBase<Owner>
     {
-        IEnumerable<Owner> GetAllData();
-        Owner GetByIDData(Guid ownerID);
-        OwnerRelated GetByIDRelatedData(Guid ownerID);
-        void PostCreateData(Owner owner);
-        void PutUpdateData(Owner dbOwner, Owner owner);
-        void DeleteByIDData(Owner owner);
+        Task<IEnumerable<Owner>> GetAllAsyncData();
+        Task<Owner> GetByIDAsyncData(Guid ownerID);
+        Task<OwnerRelated> GetByIDRelatedAsyncData(Guid ownerID);
+        Task PostCreateAsyncData(Owner owner);
+        Task PutUpdateAsyncData(Owner dbOwner, Owner owner);
+        Task DeleteByIDAsyncData(Owner owner);
     }
 }
